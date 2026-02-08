@@ -10,7 +10,7 @@ const manifest = {
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic using OMDb API.",
     "resources": ["meta"],
     "types": ["movie", "series"],
-    "idPrefixes": ["tt"],
+    // "idPrefixes": ["tt"], // Removed to allow broader matching, strict prefix might clash with Cinemeta
     "catalogs": []
 };
 
