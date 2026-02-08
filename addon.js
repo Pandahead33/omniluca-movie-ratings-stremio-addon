@@ -5,12 +5,12 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings.v2",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "name": "OmniLuca Ratings V2",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    "idPrefixes": ["tt"],
+    // "idPrefixes": ["tt"],
     "catalogs": []
 };
 
@@ -68,25 +68,18 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
                 if (source === "Rotten Tomatoes") source = "RT";
                 if (source === "Metacritic") source = "Meta";
 
-                ratingsText += `${emoji} ${source}: ${value}  \n`; // Newline for better spacing if possible
+                // Using spaces instead of newlines for title to ensure single-line display compatibility
+                ratingsText += `${emoji} ${source}: ${value}   `;
             });
         } else {
             ratingsText = "No ratings available";
         }
 
-        // Add Plot (Truncated)
-        let plot = data.Plot || "";
-        if (plot.length > 100) plot = plot.substring(0, 100) + "...";
-
         const stream = {
             title: ratingsText,
-            url: "https://omniluca-movie-ratings-stremio-addo.vercel.app/manifest.json", // Valid external URL
+            url: "https://omniluca-movie-ratings-stremio-addo.vercel.app/manifest.json",
             name: "OmniLuca Ratings",
-            description: plot,
-            behaviorHints: {
-                notWebReady: true, // Signals this isn't a direct playable stream
-                bingeGroup: "omniluca-ratings"
-            }
+            description: data.Plot || ""
         };
 
         return { streams: [stream] };
