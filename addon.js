@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -64,9 +64,12 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
                 else if (percentage >= 60) emoji = "👍"; // Good
                 else if (percentage < 40) emoji = "💩"; // Low
 
-                if (source === "Internet Movie Database") source = "IMDb";
-                if (source === "Rotten Tomatoes") source = "RT";
-                if (source === "Metacritic") source = "Meta";
+                if (source === "Internet Movie Database") {
+                    source = "IMDb";
+                    if (data.imdbVotes && data.imdbVotes !== "N/A") {
+                        value = `${value} (${data.imdbVotes} votes)`;
+                    }
+                }
 
                 // key: Use \n to force new lines for "fancy" vertical formatting in one stream
                 ratingsText += `${emoji} ${source}: ${value}\n`;
