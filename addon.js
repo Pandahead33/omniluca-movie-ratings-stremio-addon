@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -78,15 +78,12 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             ratingsText = "No ratings available";
         }
 
-        // Add Extra Info (Votes, Awards) instead of Plot
-        if (data.imdbVotes && data.imdbVotes !== "N/A") {
-            ratingsText += `🗳️ Votes: ${data.imdbVotes}\n`;
-        }
+        // Add Extra Info (Awards, Box Office)
         if (data.Awards && data.Awards !== "N/A") {
-            // Awards can be long, maybe just check if present or truncate? 
-            // OMDb Awards string is usually like "Won 4 Oscars. 42 wins & 80 nominations."
-            // Let's just show it, it's usually valuable info.
-            ratingsText += `🏆 ${data.Awards}`;
+            ratingsText += `🏆 ${data.Awards}\n`;
+        }
+        if (data.BoxOffice && data.BoxOffice !== "N/A") {
+            ratingsText += `💰 ${data.BoxOffice}\n`;
         }
 
         const stream = {
