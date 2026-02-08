@@ -4,9 +4,9 @@ const axios = require("axios");
 require('dotenv').config();
 
 const manifest = {
-    "id": "org.stremio.omnilucaratings",
-    "version": "1.0.1",
-    "name": "OmniLuca Ratings",
+    "id": "org.stremio.omnilucaratings.v2",
+    "version": "1.0.2",
+    "name": "OmniLuca Ratings V2",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
