@@ -4,13 +4,13 @@ const axios = require("axios");
 require('dotenv').config();
 
 const manifest = {
-    "id": "org.stremio.omdbratings",
-    "version": "1.0.0",
-    "name": "OMDb Ratings",
-    "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic using OMDb API.",
+    "id": "org.stremio.omnilucaratings",
+    "version": "1.0.1",
+    "name": "OmniLuca Ratings",
+    "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    // "idPrefixes": ["tt"], // Removed to allow broader matching, strict prefix might clash with Cinemeta
+    // "idPrefixes": ["tt"], 
     "catalogs": []
 };
 
@@ -39,27 +39,49 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return { streams: [{ title: `OMDb Error: ${data.Error}` }] };
         }
 
-        // Format ratings
+        // Format ratings with Conditional Emojis
         let ratingsText = "";
+
+        // Helper to parse rating value to a percentage (0-100)
+        const parseRating = (value) => {
+            if (value.includes("/")) {
+                const parts = value.split("/");
+                return (parseFloat(parts[0]) / parseFloat(parts[1])) * 100;
+            } else if (value.includes("%")) {
+                return parseFloat(value.replace("%", ""));
+            }
+            return 0;
+        };
+
         if (data.Ratings && data.Ratings.length > 0) {
             data.Ratings.forEach(rating => {
                 let source = rating.Source;
                 let value = rating.Value;
+                const percentage = parseRating(value);
+
+                let emoji = "😐"; // Default Mid
+                if (percentage >= 70) emoji = "❤️"; // High
+                else if (percentage < 50) emoji = "💩"; // Low
 
                 if (source === "Internet Movie Database") source = "IMDb";
                 if (source === "Rotten Tomatoes") source = "RT";
                 if (source === "Metacritic") source = "Meta";
 
-                ratingsText += `${source}: ${value}  `;
+                ratingsText += `${emoji} ${source}: ${value}  \n`; // Newline for better spacing if possible
             });
         } else {
             ratingsText = "No ratings available";
         }
 
+        // Add Plot (Truncated)
+        let plot = data.Plot || "";
+        if (plot.length > 100) plot = plot.substring(0, 100) + "...";
+
         const stream = {
-            title: `⭐ ${ratingsText} \n${data.Plot || ""}`,
-            url: "http://127.0.0.1", // Dummy URL, not playable
-            name: "OMDb Ratings"
+            title: ratingsText,
+            // url: "http://127.0.0.1", // Dummy URL, not playable - Removed as per instruction
+            name: "OmniLuca Ratings",
+            description: plot // Description often shows below title in some Stremio clients
         };
 
         return { streams: [stream] };
