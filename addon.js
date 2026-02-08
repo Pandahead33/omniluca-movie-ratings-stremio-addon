@@ -59,9 +59,10 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
                 let value = rating.Value;
                 const percentage = parseRating(value);
 
-                let emoji = "😐"; // Default Mid
+                let emoji = "😐"; // Default Mid (40-59%)
                 if (percentage >= 70) emoji = "❤️"; // High
-                else if (percentage < 50) emoji = "💩"; // Low
+                else if (percentage >= 60) emoji = "👍"; // Good
+                else if (percentage < 40) emoji = "💩"; // Low
 
                 if (source === "Internet Movie Database") source = "IMDb";
                 if (source === "Rotten Tomatoes") source = "RT";
