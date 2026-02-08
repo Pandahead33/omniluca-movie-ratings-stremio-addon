@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -75,12 +75,15 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             ratingsText = "No ratings available";
         }
 
-        // Add Plot at the bottom, separated by newlines
-        if (data.Plot && data.Plot !== "N/A") {
-            // Truncate plot to avoid excessive length if necessary, but AIOstreams usually shows a lot
-            let plot = data.Plot;
-            if (plot.length > 150) plot = plot.substring(0, 150) + "...";
-            ratingsText += `\n📝 ${plot}`;
+        // Add Extra Info (Votes, Awards) instead of Plot
+        if (data.imdbVotes && data.imdbVotes !== "N/A") {
+            ratingsText += `🗳️ Votes: ${data.imdbVotes}\n`;
+        }
+        if (data.Awards && data.Awards !== "N/A") {
+            // Awards can be long, maybe just check if present or truncate? 
+            // OMDb Awards string is usually like "Won 4 Oscars. 42 wins & 80 nominations."
+            // Let's just show it, it's usually valuable info.
+            ratingsText += `🏆 ${data.Awards}`;
         }
 
         const stream = {
