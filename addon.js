@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -76,10 +76,9 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
         }
 
         const stream = {
-            title: ratingsText,
+            title: `${ratingsText}\n${data.Plot || ""}`, // Putting plot back in title as description is invalid
             url: "http://127.0.0.1", // Dummy URL
-            name: "OmniLuca Ratings",
-            description: data.Plot || "" // Moving plot to description to avoid title cutoff
+            name: "OmniLuca Ratings"
         };
 
         return { streams: [stream] };
