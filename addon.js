@@ -8,27 +8,27 @@ const manifest = {
     "version": "1.0.0",
     "name": "OMDb Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic using OMDb API.",
-    "resources": ["meta"],
+    "resources": ["stream"],
     "types": ["movie", "series"],
     // "idPrefixes": ["tt"], // Removed to allow broader matching, strict prefix might clash with Cinemeta
     "catalogs": []
 };
 
+
 const builder = new addonBuilder(manifest);
 
-builder.defineResourceHandler("meta", async ({ type, id }) => {
-    console.log(`Requesting meta for ${type} ${id}`);
+builder.defineResourceHandler("stream", async ({ type, id }) => {
+    console.log(`Requesting stream for ${type} ${id}`);
 
     // Check if ID is likely an IMDb ID (starts with tt)
     if (!id.startsWith("tt")) {
-        return { meta: {} }; // OMDb mostly works with IMDb IDs
+        return { streams: [] };
     }
 
     try {
         const apiKey = process.env.OMDB_API_KEY;
         if (!apiKey) {
-            console.error("OMDb API Key is missing!");
-            return { meta: { description: "Error: API Key missing." } };
+            return { streams: [{ title: "Error: API Key missing" }] };
         }
 
         const url = `https://www.omdbapi.com/?i=${id}&apikey=${apiKey}&plot=short&r=json`;
@@ -36,48 +36,37 @@ builder.defineResourceHandler("meta", async ({ type, id }) => {
         const data = response.data;
 
         if (data.Response === "False") {
-            console.warn(`OMDb Error for ${id}: ${data.Error}`);
-            return { meta: { description: `OMDb Error: ${data.Error}` } };
+            return { streams: [{ title: `OMDb Error: ${data.Error}` }] };
         }
 
-        let description = "";
+        // Format ratings
+        let ratingsText = "";
         if (data.Ratings && data.Ratings.length > 0) {
-            description += "⭐ **Ratings:**\n";
             data.Ratings.forEach(rating => {
-                let emoji = "📊";
-                if (rating.Source === "Internet Movie Database") emoji = "🎥";
-                if (rating.Source === "Rotten Tomatoes") emoji = "🍅";
-                if (rating.Source === "Metacritic") emoji = "Ⓜ️";
+                let source = rating.Source;
+                let value = rating.Value;
 
-                description += `${emoji} **${rating.Source}**: ${rating.Value}\n`;
+                if (source === "Internet Movie Database") source = "IMDb";
+                if (source === "Rotten Tomatoes") source = "RT";
+                if (source === "Metacritic") source = "Meta";
+
+                ratingsText += `${source}: ${value}  `;
             });
-            description += "\n";
+        } else {
+            ratingsText = "No ratings available";
         }
 
-        description += data.Plot || "";
-
-        const meta = {
-            id: id,
-            type: type,
-            name: data.Title,
-            poster: data.Poster !== "N/A" ? data.Poster : null,
-            background: data.Poster !== "N/A" ? data.Poster : null, // OMDb doesn't give background, reusing poster
-            description: description,
-            releaseInfo: data.Year,
-            imdbRating: data.imdbRating,
-            runtime: data.Runtime,
-            language: data.Language,
-            country: data.Country,
-            director: data.Director,
-            cast: data.Actors ? data.Actors.split(", ") : [],
-            genres: data.Genre ? data.Genre.split(", ") : []
+        const stream = {
+            title: `⭐ ${ratingsText} \n${data.Plot || ""}`,
+            url: "http://127.0.0.1", // Dummy URL, not playable
+            name: "OMDb Ratings"
         };
 
-        return { meta };
+        return { streams: [stream] };
 
     } catch (error) {
         console.error("Error fetching from OMDb:", error.message);
-        return { meta: {} };
+        return { streams: [{ title: `Internal Error: ${error.message}` }] };
     }
 });
 
