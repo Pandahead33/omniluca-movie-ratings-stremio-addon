@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings.v2",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "name": "OmniLuca Ratings V2",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
