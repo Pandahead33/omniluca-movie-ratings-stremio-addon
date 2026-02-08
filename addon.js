@@ -80,9 +80,13 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
 
         const stream = {
             title: ratingsText,
-            // url: "http://127.0.0.1", // Dummy URL, not playable - Removed as per instruction
+            url: "https://omniluca-movie-ratings-stremio-addo.vercel.app/manifest.json", // Valid external URL
             name: "OmniLuca Ratings",
-            description: plot // Description often shows below title in some Stremio clients
+            description: plot,
+            behaviorHints: {
+                notWebReady: true, // Signals this isn't a direct playable stream
+                bingeGroup: "omniluca-ratings"
+            }
         };
 
         return { streams: [stream] };
