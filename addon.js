@@ -4,9 +4,9 @@ const axios = require("axios");
 require('dotenv').config();
 
 const manifest = {
-    "id": "org.stremio.omnilucaratings.v3", // New ID to force fresh install
-    "version": "1.0.6",
-    "name": "OmniLuca Ratings V3",
+    "id": "org.stremio.omnilucaratings",
+    "version": "1.0.7",
+    "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
