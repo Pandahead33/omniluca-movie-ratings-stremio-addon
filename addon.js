@@ -10,7 +10,7 @@ const manifest = {
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    // "idPrefixes": ["tt"], 
+    "idPrefixes": ["tt"],
     "catalogs": []
 };
 
