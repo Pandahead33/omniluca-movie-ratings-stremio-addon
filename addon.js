@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -39,27 +39,47 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return { streams: [{ title: `OMDb Error: ${data.Error}` }] };
         }
 
-        // Format ratings
+        // Format ratings with Conditional Emojis
         let ratingsText = "";
+
+        // Helper to parse rating value to a percentage (0-100)
+        const parseRating = (value) => {
+            if (value.includes("/")) {
+                const parts = value.split("/");
+                return (parseFloat(parts[0]) / parseFloat(parts[1])) * 100;
+            } else if (value.includes("%")) {
+                return parseFloat(value.replace("%", ""));
+            }
+            return 0;
+        };
+
         if (data.Ratings && data.Ratings.length > 0) {
             data.Ratings.forEach(rating => {
                 let source = rating.Source;
                 let value = rating.Value;
+                const percentage = parseRating(value);
+
+                let emoji = "😐"; // Default Mid (40-59%)
+                if (percentage >= 70) emoji = "❤️"; // High
+                else if (percentage >= 60) emoji = "👍"; // Good
+                else if (percentage < 40) emoji = "💩"; // Low
 
                 if (source === "Internet Movie Database") source = "IMDb";
                 if (source === "Rotten Tomatoes") source = "RT";
                 if (source === "Metacritic") source = "Meta";
 
-                ratingsText += `${source}: ${value}  `;
+                // Using spaces instead of newlines for title to ensure single-line display compatibility in strictly "stream" views
+                ratingsText += `${emoji} ${source}: ${value}   `;
             });
         } else {
             ratingsText = "No ratings available";
         }
 
         const stream = {
-            title: `⭐ ${ratingsText} \n${data.Plot || ""}`,
-            url: "http://127.0.0.1", // Dummy URL, not playable
-            name: "OmniLuca Ratings"
+            title: ratingsText,
+            url: "http://127.0.0.1", // Dummy URL
+            name: "OmniLuca Ratings",
+            description: data.Plot || "" // Moving plot to description to avoid title cutoff
         };
 
         return { streams: [stream] };
