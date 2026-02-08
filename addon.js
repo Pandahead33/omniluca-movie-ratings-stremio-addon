@@ -4,13 +4,13 @@ const axios = require("axios");
 require('dotenv').config();
 
 const manifest = {
-    "id": "org.stremio.omnilucaratings.v2",
-    "version": "1.0.5",
-    "name": "OmniLuca Ratings V2",
+    "id": "org.stremio.omnilucaratings.v3", // New ID to force fresh install
+    "version": "1.0.6",
+    "name": "OmniLuca Ratings V3",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    "idPrefixes": ["tt"],
+    // "idPrefixes": ["tt"], // Commented out as per working state
     "catalogs": []
 };
 
@@ -77,7 +77,7 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
 
         const stream = {
             title: ratingsText,
-            url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Test with REAL video
+            url: "http://127.0.0.1", // Returning to dummy URL as this worked before
             name: "OmniLuca Ratings",
             description: data.Plot || ""
         };
