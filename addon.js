@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
@@ -39,7 +39,8 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return { streams: [{ title: `OMDb Error: ${data.Error}` }] };
         }
 
-        const streams = [];
+        // Format ratings with Conditional Emojis
+        let ratingsText = "";
 
         // Helper to parse rating value to a percentage (0-100)
         const parseRating = (value) => {
@@ -52,7 +53,6 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return 0;
         };
 
-        // 1. Add Rating Streams
         if (data.Ratings && data.Ratings.length > 0) {
             data.Ratings.forEach(rating => {
                 let source = rating.Source;
@@ -60,40 +60,36 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
                 const percentage = parseRating(value);
 
                 let emoji = "😐"; // Default Mid (40-59%)
-                if (percentage >= 70) emoji = "❤️"; // High
+                if (percentage >= 70) emoji = "🔥"; // High (Changed to Fire)
                 else if (percentage >= 60) emoji = "👍"; // Good
                 else if (percentage < 40) emoji = "💩"; // Low
 
-                // Simplify Source Names for the "Name" column (Left side)
-                let shortSource = source;
-                if (source === "Internet Movie Database") shortSource = "IMDb";
-                if (source === "Rotten Tomatoes") shortSource = "RT";
-                if (source === "Metacritic") shortSource = "Meta";
+                if (source === "Internet Movie Database") source = "IMDb";
+                if (source === "Rotten Tomatoes") source = "RT";
+                if (source === "Metacritic") source = "Meta";
 
-                streams.push({
-                    name: shortSource, // Left column
-                    title: `${emoji} ${value}`, // Right column
-                    url: "http://127.0.0.1" // Dummy URL
-                });
+                // key: Use \n to force new lines for "fancy" vertical formatting in one stream
+                ratingsText += `${emoji} ${source}: ${value}\n`;
             });
         } else {
-            streams.push({
-                name: "Ratings",
-                title: "No ratings available",
-                url: "http://127.0.0.1"
-            });
+            ratingsText = "No ratings available";
         }
 
-        // 2. Add Plot Stream
+        // Add Plot at the bottom, separated by newlines
         if (data.Plot && data.Plot !== "N/A") {
-            streams.push({
-                name: "Plot",
-                title: data.Plot,
-                url: "http://127.0.0.1"
-            });
+            // Truncate plot to avoid excessive length if necessary, but AIOstreams usually shows a lot
+            let plot = data.Plot;
+            if (plot.length > 150) plot = plot.substring(0, 150) + "...";
+            ratingsText += `\n📝 ${plot}`;
         }
 
-        return { streams: streams };
+        const stream = {
+            title: ratingsText,
+            url: "http://127.0.0.1", // Dummy URL
+            name: "OmniLuca Ratings"
+        };
+
+        return { streams: [stream] };
 
     } catch (error) {
         console.error("Error fetching from OMDb:", error.message);
