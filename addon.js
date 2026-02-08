@@ -5,12 +5,12 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings.v2",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "name": "OmniLuca Ratings V2",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    // "idPrefixes": ["tt"],
+    "idPrefixes": ["tt"],
     "catalogs": []
 };
 
@@ -77,7 +77,7 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
 
         const stream = {
             title: ratingsText,
-            url: "https://omniluca-movie-ratings-stremio-addo.vercel.app/manifest.json",
+            url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Test with REAL video
             name: "OmniLuca Ratings",
             description: data.Plot || ""
         };
