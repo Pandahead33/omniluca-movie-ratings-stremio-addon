@@ -5,12 +5,12 @@ require('dotenv').config();
 
 const manifest = {
     "id": "org.stremio.omnilucaratings",
-    "version": "1.0.10",
+    "version": "1.1.0",
     "name": "OmniLuca Ratings",
     "description": "Displays ratings from IMDb, Rotten Tomatoes, and Metacritic.",
     "resources": ["stream"],
     "types": ["movie", "series"],
-    // "idPrefixes": ["tt"], // Commented out as per working state
+    // "idPrefixes": ["tt"], 
     "catalogs": []
 };
 
@@ -39,8 +39,7 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return { streams: [{ title: `OMDb Error: ${data.Error}` }] };
         }
 
-        // Format ratings with Conditional Emojis
-        let ratingsText = "";
+        const streams = [];
 
         // Helper to parse rating value to a percentage (0-100)
         const parseRating = (value) => {
@@ -53,6 +52,7 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
             return 0;
         };
 
+        // 1. Add Rating Streams
         if (data.Ratings && data.Ratings.length > 0) {
             data.Ratings.forEach(rating => {
                 let source = rating.Source;
@@ -64,24 +64,36 @@ builder.defineResourceHandler("stream", async ({ type, id }) => {
                 else if (percentage >= 60) emoji = "👍"; // Good
                 else if (percentage < 40) emoji = "💩"; // Low
 
-                if (source === "Internet Movie Database") source = "IMDb";
-                if (source === "Rotten Tomatoes") source = "RT";
-                if (source === "Metacritic") source = "Meta";
+                // Simplify Source Names for the "Name" column (Left side)
+                let shortSource = source;
+                if (source === "Internet Movie Database") shortSource = "IMDb";
+                if (source === "Rotten Tomatoes") shortSource = "RT";
+                if (source === "Metacritic") shortSource = "Meta";
 
-                // Using spaces instead of newlines for title to ensure single-line display compatibility in strictly "stream" views
-                ratingsText += `${emoji} ${source}: ${value}   `;
+                streams.push({
+                    name: shortSource, // Left column
+                    title: `${emoji} ${value}`, // Right column
+                    url: "http://127.0.0.1" // Dummy URL
+                });
             });
         } else {
-            ratingsText = "No ratings available";
+            streams.push({
+                name: "Ratings",
+                title: "No ratings available",
+                url: "http://127.0.0.1"
+            });
         }
 
-        const stream = {
-            title: `${ratingsText}\n${data.Plot || ""}`, // Putting plot back in title as description is invalid
-            url: "http://127.0.0.1", // Dummy URL
-            name: "OmniLuca Ratings"
-        };
+        // 2. Add Plot Stream
+        if (data.Plot && data.Plot !== "N/A") {
+            streams.push({
+                name: "Plot",
+                title: data.Plot,
+                url: "http://127.0.0.1"
+            });
+        }
 
-        return { streams: [stream] };
+        return { streams: streams };
 
     } catch (error) {
         console.error("Error fetching from OMDb:", error.message);
